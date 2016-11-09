@@ -1,0 +1,53 @@
+import * as Sequelize from 'sequelize';
+
+export module {{camel database}} {
+  export const sequelize = new Sequelize(
+    '{{database}}',
+    '{{username}}',
+    '{{password}}', {
+      host: '{{host}}',
+      dialect: '{{dialect}}',
+    });
+
+  // Begin Relations
+  {{#each models as |fields modelName|}}{{#manyToMany fields as |source target relation fk|}} {{!-- with the model's --}}
+  {{camelRename source}}.Model.belongsToMany({{camelRename target}}.Model, { through: {{camelRename relation}}.Model, foreignKey: '{{fk}}' }); // Many to many
+  {{else}}{{#oneToMany fields as |source target fk|}}
+  {{camelRename source}}.Model.belongsTo({{camelRename target}}.Model, { foreignKey: '{{fk}}' }); // One to many
+  {{camelRename target}}.Model.hasMany({{camelRename source}}.Model, { foreignKey: '{{fk}}' }); // One to many
+  {{/oneToMany}}{{/manyToMany}}{{/each}}
+  // End Relations
+
+  {{#each models as |fields modelName|}}
+  export module {{camelRename modelName}} {
+    export interface Attributes {
+    {{#each fields as |field fieldName|}}
+      {{#unless isSerialKey}}{{camelRename fieldName}}: {{{asTSType field}}}{{#if allowNull}} | null{{/if}},{{/unless}}
+    {{/each}}
+    };
+
+    export interface Instance extends Sequelize.Instance<Attr>, Attributes { };
+
+    export const Model = sequelize.define<Instance, Attributes>('{{camelRename modelName}}', {
+    {{#each fields as |field fieldName|}}
+      {{camelRename fieldName}}: {
+        type: {{{asSequelizeType field}}},
+        allowNull: {{allowNull}},
+        field: {{{str fieldName}}},
+        {{#if isSerialKey}}autoIncrement: true,{{/if}}
+        {{#if primaryKey}}primaryKey: true,{{/if}}
+        {{{defaultValue field}}}
+        {{#if isForeignKey}}
+        references: {
+          model: '{{target_table}}',
+          key: '{{target_column}}',
+        },
+        {{/if}}
+      },
+    {{/each}}
+    }, {
+      tableName: {{{str modelName}}}
+    });
+  }
+  {{/each}}
+}

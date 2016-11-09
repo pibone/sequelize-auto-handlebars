@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+
+const { run, build, write } = require('./');
+const path = require('path');
+const _ = require('lodash/fp');
+
+const argv = require('yargs')
+  .usage('Usage: sequelize-auto -h <host> -d <database> -u <user> -x [password] -p [port]  --dialect [dialect] -c [/path/to/config] -o [/path/to/models] -t [tableName]')
+  .alias('h', 'host').describe('h', 'IP/Hostname for the database.')
+  .alias('d', 'database').describe('d', 'Database name.')
+  .alias('u', 'user').describe('u', 'Username for database.')
+  .alias('x', 'password').describe('x', 'Password for database.')
+  .alias('p', 'port').describe('p', 'Port number for database.')
+  .alias('c', 'config').describe('c', 'JSON file for Sequelize\'s constructor "options" flag object as defined here: https://sequelize.readthedocs.org/en/latest/api/sequelize/')
+  .alias('o', 'output').describe('o', 'What directory to place the models.')
+  .alias('e', 'dialect').describe('e', 'The dialect/engine that you\'re using: postgres, mysql, sqlite, mssql')
+  .alias('t', 'tables').describe('t', 'Comma-separated names of tables to import')
+  .alias('T', 'template').describe('T', 'handlebars file template to be used')
+  .argv;
+
+const configFile = argv.c ? require(path.resolve(argv.c)) : {};
+const config = {
+  output: argv.o || (configFile.output && path.resolve(path.join(process.cwd(), configFile.output))) || path.resolve(path.join(process.cwd(), 'models')),
+  template: argv.T || (configFile.template && path.resolve(path.join(process.cwd(), configFile.template))) || path.join(__dirname, 'default.ts.hbs'),
+  options: {
+    host: argv.h || configFile.host || 'localhost',
+    dialect: argv.e || configFile.dialect || 'mysql',
+    storage: argv.d || configFile.storage,
+    additional: configFile.additional || {},
+    tables: (argv.t && argv.t.split(',')) || configFile.tables || null
+  },
+  host: argv.h || configFile.host || 'localhost',
+  dialect: argv.e || configFile.dialect || 'mysql',
+  database: argv.d || configFile.database || '',
+  username: argv.u || configFile.username || '',
+  password: (!!argv.x ? ('' + argv.x) : null) || configFile.password || '',
+  port: argv.p || configFile.port || ((argv.e && argv.e === 'mssql') ? 1433 : 3306),
+  tables: (argv.t && argv.t.split(',')) || (!_.isEmpty(configFile.tables) ? configFile.tables : false) || null,
+  renames: !configFile.renames ? {} : _.fromPairs(configFile.renames)
+};
+
+if (!config.host || !config.database) {
+  throw new Error('host and database are required');
+}
+
+const scan = (scanF) => ([head, ...tail]) => _.reduce(scanF, head)(tail);
+
+_.flow([
+  _.over([build, run, write]),
+  scan((a, c) => a.then(c)),
+])(config);

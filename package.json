@@ -1,0 +1,20 @@
+{
+  "name": "sequelize-auto-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "refactor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.1.2",
+    "graceful-fs-extra": "^2.0.0",
+    "handlebars": "^4.0.5",
+    "lodash": "^4.16.4",
+    "mkdirp": "^0.5.1",
+    "sequelize": "^3.24.6",
+    "tedious": "^1.14.0"
+  }
+}

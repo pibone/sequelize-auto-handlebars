@@ -1,0 +1,71 @@
+{
+  "title": "JSON schema for sequelize auto for AMCOEX",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "required": ["host", "database"],
+  "properties": {
+    "host": {
+      "description": "The host where to connect.",
+      "type": "string",
+      "default": "localhost"
+    },
+    "database": {
+      "description": "The database to be used, on SQLite the storage file.",
+      "type": "string",
+      "default": "database_name"
+    },
+    "dialect": {
+      "description": "The sequelize dialect to be used.",
+      "enum": [
+        "mssql", "mysql", "posgre", "sqlite"
+      ],
+      "default": "mysql"
+    },
+    "tables": {
+      "description": "The tables that will be exported.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "username": {
+      "description": "The username used for the database connection.",
+      "type": "string",
+      "default": "username"
+    },
+    "password": {
+      "description": "The password used for the database connection.",
+      "type": "string",
+      "default": "password"
+    },
+    "port": {
+      "description": "The port to be used for the database connection (default mssql ? 1433 : 3306)",
+      "type": "number",
+      "default": "3306"
+    },
+    "renames": {
+      "description": "Table renames.",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "maxItems": 2,
+        "minItems": 2,
+        "items": {
+          "type": "string"
+        }
+      },
+      "default": []
+    },
+    "output": {
+      "description": "Destination folder.",
+      "type": "string",
+      "default": "models"
+    },
+    "template": {
+      "description": "Template file to be used.",
+      "type": "string",
+      "default": "./default.ts.hbs"
+    }
+  }
+}

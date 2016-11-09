@@ -1,5 +1,5 @@
 {
-  "name": "sequelize-auto-ts",
+  "name": "sequelize-auto-handlebars",
   "version": "1.0.0",
   "description": "",
   "main": "refactor.js",

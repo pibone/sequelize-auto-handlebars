@@ -1,6 +1,6 @@
 {
   "name": "sequelize-auto-handlebars",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "refactor.js",
   "scripts": {
@@ -20,5 +20,8 @@
     "mkdirp": "^0.5.1",
     "sequelize": "^3.24.6",
     "tedious": "^1.14.0"
+  },
+  "bin": {
+    "sequelize-auto": "bin/sequelize-auto"
   }
 }

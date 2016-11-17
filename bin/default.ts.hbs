@@ -8,15 +8,16 @@ export module {{camel database}} {
       host: '{{host}}',
       dialect: '{{dialect}}',
     });
-
-  // Begin Relations
-  {{#each models as |fields modelName|}}{{#manyToMany fields as |source target relation fk|}} {{!-- with the model's --}}
-  {{camelRename source}}.Model.belongsToMany({{camelRename target}}.Model, { through: {{camelRename relation}}.Model, foreignKey: '{{fk}}' }); // Many to many
-  {{else}}{{#oneToMany fields as |source target fk|}}
-  {{camelRename source}}.Model.belongsTo({{camelRename target}}.Model, { foreignKey: '{{fk}}' }); // One to many
-  {{camelRename target}}.Model.hasMany({{camelRename source}}.Model, { foreignKey: '{{fk}}' }); // One to many
-  {{/oneToMany}}{{/manyToMany}}{{/each}}
-  // End Relations
+  const makeRelations = () => {
+    // Begin Relations
+    {{#each models as |fields modelName|}}{{#manyToMany fields as |source target relation fk|}} {{!-- with the model's --}}
+    {{camelRename source}}.Model.belongsToMany({{camelRename target}}.Model, { through: {{camelRename relation}}.Model, foreignKey: '{{fk}}' }); // Many to many
+    {{else}}{{#oneToMany fields as |source target fk|}}
+    {{camelRename source}}.Model.belongsTo({{camelRename target}}.Model, { foreignKey: '{{fk}}' }); // One to many
+    {{camelRename target}}.Model.hasMany({{camelRename source}}.Model, { foreignKey: '{{fk}}' }); // One to many
+    {{/oneToMany}}{{/manyToMany}}{{/each}}
+    // End Relations
+  };
 
   {{#each models as |fields modelName|}}
   export module {{camelRename modelName}} {
@@ -50,4 +51,5 @@ export module {{camel database}} {
     });
   }
   {{/each}}
+  makeRelations();
 }

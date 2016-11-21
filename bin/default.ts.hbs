@@ -47,7 +47,8 @@ export module {{camel database}} {
       },
     {{/each}}
     }, {
-      tableName: {{{str modelName}}}
+      tableName: {{{str modelName}}},
+      {{#isManyToMany fields}}timestamps: false,{{/isManyToMany}}
     });
   }
   {{/each}}

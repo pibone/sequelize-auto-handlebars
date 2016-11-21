@@ -170,12 +170,16 @@ const run = (config) => ({ options, tables }) => {
       ])(defaultValue)},` : '';
   });
 
+  const isManyToMany = (fields) =>
+        _.size(_.filter('isForeignKey')(fields)) === 2
+        && ((_.size(fields) === 2)
+            || _.size(fields) === 3 && _.size(_.filter({ isSerialKey: true, primaryKey: true })(fields)) === 1);
+
   Handlebars.registerHelper('str', (value) => `'${value}'`);
   Handlebars.registerHelper('camel', _.camelCase);
   Handlebars.registerHelper('manyToMany', (fields, { fn, inverse, data }) => {
     const foreignKeys = _.filter('isForeignKey')(fields);
-    const isManyToMany = _.size(foreignKeys) === 2 && _.size(fields) === 2;
-    return isManyToMany ? _.flow([
+    return isManyToMany(fields) ? _.flow([
       (foreignKeys) => ([{
         source: foreignKeys[1].target_table,
         target: foreignKeys[0].target_table,
@@ -192,6 +196,8 @@ const run = (config) => ({ options, tables }) => {
       _.reduce((a, c) => a + c, ''),
     ])(foreignKeys) : inverse(this);
   });
+
+  Handlebars.registerHelper('isManyToMany', (fields, options) => isManyToMany(fields) ? options.fn(this) : '');
 
   Handlebars.registerHelper('oneToMany', (fields, { fn, inverse, data }) => _.flow([
       _.map((foreignKey) => ({
